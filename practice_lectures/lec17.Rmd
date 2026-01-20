@@ -1,0 +1,986 @@
+---
+title: "Practice Lecture 17 MATH 342W Queens College"
+author: "Professor Adam Kapelner"
+---
+
+
+## Model Selection and Three Data Splits
+
+This unit is split into three use cases (1) Selection among M explicit models (2) Stepwise Model (3) Construction Hyperparameter Selection within one algorithm
+
+# Use Case (I) Selecting one of M Explicit Models
+
+We have now covered non-linearities (e.g. polynomial terms) and interactions. A new complication now clearly emerges. If I have $p$ predictors, there are many linear least squares models I can build (considering non-linear least squares models makes the space of models even larger!!)
+
+For instance, here are a bunch of models and their in-sample performance:
+
+```{r}
+pacman::p_load(ggplot2)
+diamonds$cut =      factor(diamonds$cut, ordered = FALSE)      #convert to nominal
+diamonds$color =    factor(diamonds$color, ordered = FALSE)    #convert to nominal
+diamonds$clarity =  factor(diamonds$clarity, ordered = FALSE)  #convert to nominal
+all_model_formulas = list( #note: need these as strings for later...
+  "price ~ carat + depth",
+  "price ~ carat + depth + color + x + y + z",
+  "price ~ .",
+  "price ~ . * ."
+)
+mods = lapply(all_model_formulas, lm, diamonds)
+lapply(mods, function(mod){summary(mod)$sigma})
+```
+
+Obviously the in-sample RMSE's are increasing due to the complexity, but which model is "best"?
+
+This is one of the most fundamental problems in statistics, and possibly all of science! 
+
+In class, we discussed validation via dividing $\mathbb{D}$ into (a) a training set and a (b) testing set. Now, we will further divide the training set into (a) a sub-training set and a (b) selection set and we still have the (c) test set. 
+
+The total training set together will fit a model and testing will estimate future performance. But within the total training set, we'll use an elaborate algorithim: we'll fit many models and take the best one. That's the "master algorithm".
+
+We'll make the selection set and the test set the same size but we don't have to. First split up the data:
+
+```{r}
+n = nrow(diamonds)
+K = 5
+set.seed(1984)
+test_indices = sample(1 : n, size = n * 1 / K)
+master_train_indices = setdiff(1 : n, test_indices)
+select_indices = sample(master_train_indices, size = n * 1 / K)
+train_indices = setdiff(master_train_indices, select_indices)
+rm(master_train_indices)
+
+#make sure we did this right:
+pacman::p_load(testthat)
+expect_equal(1 : n, sort(c(train_indices, select_indices, test_indices)))
+
+diamonds_train = diamonds[train_indices, ]
+diamonds_select = diamonds[select_indices, ]
+diamonds_test = diamonds[test_indices, ]
+
+rm(test_indices, select_indices, train_indices)
+```
+
+Now, fit all models and select the best one:
+
+```{r}
+mods = lapply(all_model_formulas, lm, diamonds_train)
+```
+
+Now predict on the selection set and look at the oos $s_e$, and select the "best" model
+
+```{r}
+yhat_selects = lapply(mods, function(mod){predict(mod, diamonds_select)})
+y_select = diamonds_select$price #the true prices
+
+s_e_s = lapply(yhat_selects, function(yhat_select){sd(yhat_select - y_select)})
+s_e_s
+#find the minimum
+which.min(s_e_s)
+```
+
+Which are overfit? Which are underfit? Were these models "poor choices"?
+
+Can we go back and fit some more models? 
+
+Yes - as long as we don't open the "lockbox" of the test set. Let's look at one more model. An expansion of the best of the previous 4 models now with a couple interactions we are convinced are real plus a couple of non-linear terms.
+
+Note the use of the "I" in the formula. That basically means as-is so I(carat^2) means make a new column in X which is calculated directly as carat^2. If I wrote poly(carat, 2) it would also include carat^1 which is already in the model from the interactions. Ditto for depth
+
+```{r}
+all_model_formulas[[5]] = "price ~ . + carat * color + carat * depth + I(carat^2) + I(depth^2)"
+mods[[5]] = lm(all_model_formulas[[5]], diamonds_train) 
+mods[[5]]
+
+yhat_selects[[5]] = predict(mods[[5]], diamonds_select)
+
+s_e_s[[5]] = sd(yhat_selects[[5]] - y_select)
+s_e_s
+#find the minimum
+which.min(s_e_s)
+```
+
+We can go further and fit more and more models but we should always be careful that we don't fit too many as we may optimize to the selection set. Here, we are lucky since the selection set is large (~11,000 observations) so this is not too much of a fear.
+
+But you can see the problem - how can we build a good model??
+
+The answer to this is non-parametric regression / machine learning. But first, we will cover two other important topics before we get there.
+
+Let us return and complete the exercise by now declaring we are done modeling and we are going to ship model 5. Let us get a conservative estimate of its performance:
+
+```{r}
+mod5_for_test = lm(all_model_formulas[[5]], rbind(diamonds_train, diamonds_select))
+yhat_test_mod5 = predict(mod5_for_test, diamonds_test)
+y_test = diamonds_test$price #the true prices
+sd(yhat_test_mod5 - y_test)
+```
+
+About the same as the selection estimate --- we did not overfit too much to the selection set.
+
+At this point the lockbox is open and we can never return (if we are honest, of course - many people in this business are not but it's never worth it).
+
+Now we can build production model 5 with all data to ship:
+
+```{r}
+mod_final = lm(all_model_formulas[[5]], diamonds)
+```
+
+No evaluation is done on the final model. It is only used to predict future diamonds' prices.
+
+We can make two improvements using CV to the above model selection procedure:
+
+* To reduce variance in the selection process, you make a CV of the selection set. 
+* To reduce variance in the testing process, you make an outer CV of the test set so that the first CV is a nested resampling. 
+
+This is a lot more coding! But we're in luck because it's done for us already in methods in packages. Hopefully I will have time to demo this later.
+
+
+# Use Case (III) Hyperparameter Selection
+
+Remember the `lambda` from the Vapnik Objective Function which we minimized to compute an SVM for non-linearly separable data? We now have a way to automatically select its value. Each lambda value implies a different model. Hence we need to do "model selection" to select a hyperparameter which selects our model with the best performance.
+
+Let's demo this on the `adult` dataset. Due to computational concerns only, let's limit the dataset to be size n = 2000 with 1/3-1/3-1/3 training-select-test sets.
+
+```{r}
+rm(list = ls())
+pacman::p_load_gh("coatless/ucidata") #load from github
+data(adult)
+adult = na.omit(adult)
+adult$native_country = NULL
+adult$income = factor(adult$income)
+n = 2001
+set.seed(5)
+adult = adult[sample(1 : nrow(adult), n), ]
+adult_train =  adult[1 : (n / 3), ]
+adult_select = adult[(n / 3 + 1) : (2 * n / 3), ]
+adult_test =   adult[(2 * n / 3 + 1) : n, ]
+```
+
+We now load the SVM package. Recall how to use the SVM: you specify a "cost" argument. That cost is related to the lambda value.
+
+```{r}
+pacman::p_load(e1071)
+#e.g. 
+#svm(income ~ ., adult_train, kernel = "linear", cost = 0.1)
+```
+
+So now we need to pick a bunch of cost values to search over. This is called a "grid search". It's still a decision! How many values in the grid? Step size? Minimum? Maximum? 
+
+Let's search over M models. And we can specify cost values on the log10 scale.
+
+```{r}
+M = 30
+cost_grid = 10^seq(from = -3, to = 4, length.out = M)
+cost_grid
+```
+
+Let's do our search and collect errors on the select set:
+
+```{r}
+select_set_misclassification_errors_by_m = array(NA, M)
+for (m in 1 : M){
+  cat(m, "of", M, "\n")
+  #train on train set
+  svm_mod = svm(factor(income) ~ ., adult_train, kernel = "linear", cost = cost_grid[m])
+  #predict on select set
+  y_hat = predict(svm_mod, adult_select)
+  #measure error from the select set
+  select_set_misclassification_errors_by_m[m] = mean(adult_select$income != y_hat)
+}
+```
+
+Why does it get slower and reach the max # of iterations? Tougher optimization problem - it's not finding the minimum
+
+Let's plot these oos misclassification error rates:
+
+```{r}
+ggplot(data.frame(cost = cost_grid, miscl_err = select_set_misclassification_errors_by_m)) + 
+  aes(x = cost, y = miscl_err) +
+  geom_line(color = "grey") + 
+  geom_point(size = 3) + 
+  scale_x_log10()
+```
+
+Looks like the grid gave us a natural minimum. We can find the best value of the cost hyperparameter and its associated misclassification error:
+
+```{r}
+select_set_misclassification_errors_by_m
+optimal_cost_hyperparam = cost_grid[which.min(select_set_misclassification_errors_by_m)]
+optimal_cost_hyperparam
+```
+
+Assume we will use this model and not test any more values of cost, we can get an honest performance metric for this optimally-tuned hyperparameter svm for the future on the test set:
+
+```{r}
+svm_mod = svm(income ~ ., rbind(adult_train, adult_select), kernel = "linear", cost = optimal_cost_hyperparam)
+y_hat = predict(svm_mod, adult_test)
+mean(adult_test$income != y_hat)
+```
+
+This is about the same as we found on the select set (slightly lower as we have less estimation error). Thus, we didn't overfit the select set too much. It wasn't expected to overfit - we have a lot of data relative to the # of df.
+
+To ship the final model, use all the data.
+
+```{r}
+g_final = svm(income ~ ., adult, kernel = "linear", cost = optimal_cost_hyperparam)
+```
+
+We do not test the final model; we only use it to predict in the future.
+
+
+
+## Piping
+
+Take a look at this one-liner:
+
+
+```{r}
+set.seed(1984)
+mean(head(round(sample(rnorm(1000), 100), digits = 2)))
+```
+
+This is hard to read. Of course we can make it easier by using breaklines e.g.
+
+```{r}
+mean(
+  head(
+    round(
+      sample(
+        rnorm(1000), 
+        100
+      ), 
+      digits = 2
+    )
+  )
+)
+```
+
+But it doesn't make it much easier to read. And it probably makes it harder to write. 
+
+Enter an idea taken from unix / linux. Output of one function is input to next function. It is the inverse of the usual "order of operations". Let's see how this works.
+
+We first load the piping library:
+
+```{r}
+pacman::p_load(magrittr)
+```
+
+The package is named after Rene Magritte, the Belgian surrealist artist because he wrote [(Ceci n'est pas un pipe)](https://en.wikipedia.org/wiki/The_Treachery_of_Images) on a painting of a pipe.
+
+In pipe format this would look like:
+
+```{r}
+set.seed(1984)
+rnorm(1000) %>% #the pipe operator
+  sample(100) %>% 
+  round(digits = 2) %>% #the first argument is passed in automatically.
+  head %>%
+  mean
+```
+
+That's it! There's nothing more to it other than a gain in readability. Here's a cute joke based on this idea:
+
+https://www.mzes.uni-mannheim.de/socialsciencedatalab/article/efficient-data-r/figures/basertidyverse.png
+
+What if we wanted to do something like `mean(rnorm(1000) + 1)`? This `rnorm(1000) %>% +1 %>% mean` doesn't work because I imagine because the basic arithmetic operators couldn't be parsed like normal while there was a pipe. So they invented special pipe functions for this:
+
+```{r}
+rnorm(1000) %>% 
+  add(1) %>% 
+  mean
+```
+
+There are other exceptions to the rule too which you'll figure out if you adopt the pipe.
+
+Unfortunately... the world at large hasn't completely accepted this as a way to write R. So feel free to use for yourself. But be careful when using this style with others. There are places where everyone uses the pipes (we will see this when we get to dplyr). Also note the code you write with pipes will be slower than the normal syntax.
+
+
+## Data "Munging" with Dplyr and data.table
+
+"Data munging", sometimes referred to as "data wrangling", is the process of transforming and mapping data from one "raw" data form into another format with the intent of making it more appropriate and valuable for a variety of downstream purposes such as analytics. A data wrangler is a person who performs these transformation operations. -[Wikipedia](https://en.wikipedia.org/wiki/Data_wrangling).
+
+Half of what a data scientist does is cleaning data, visualizing data and wrangling it. In the process you learn all about your dataset and you're on a higher level when it comes time to build prediction models.
+
+The packages `dplyr` and `data.table` offer many convenient functions to manipulate, clean, and otherwise wrangle data. Note: all the wrangling we're going to see *can* be done with base R (see previous notes on the `data.frame` object) but it would be *very very very very* annoying and *very very very very* slow.
+
+I will quickly compare and contrast `dplyr` and `data.table` before you see it inside actual code.
+
+* `dplyr` works really nicely with the piping chain as you "begin" the manipulation with the dataset and then iteratively pipe in step 1, step 2, etc until you wind up with what end product you would like. This makes `dplyr` very readable but very verbose - lots of lines of code. 
+* On the flip side, `data.table` essentially wrote a new data wrangling language so it's a harder learning curve but it's very compact - very few lines of code.
+* `data.table` is blazing fast and kills `dplyr` in performance and I'm pretty sure it even beats Python in performance (someone please check this). So in the era of "big data", I think this is the winner even though it is much harder to learn.
+* I believe `dplyr` is more popular in the real world and thus has more cache to put on your CV. But this is constantly in flux!
+
+For all labs and the final project, you are recommended to pick one you want to use and go with it. For the exams, I will write code in both (if need be) to not penalize / reward a student who picked one over the other.
+
+Here is a nice [translation guide](https://atrebas.github.io/post/2019-03-03-datatable-dplyr/) between `dplyr` and `data.table`. We will be learning them in tandem. I could've split this into two units but I decided against it because (1) it is good to see the same functionality side-by-side and (2) this is really just one concept.
+
+More recently, there have been efforts to use dplyr syntax with the backend of data.table which gives the readability and the speed which is the best of both worlds. The packages are called tidytable or dtplyr. Check out these [benchmarks](https://markfairbanks.github.io/tidytable/articles/speed_comparisons.html). For this reason, I think I will make the lab require dplyr as dplyr has more popular and readable syntax and now it can be run at data.table speeds. However, real power users should learn data.table as the translation is not perfect. So I'll be demoing data.table syntax here for your own edification.
+
+```{r}
+pacman::p_load(tidyverse, magrittr) #tidyverse is shorthard for dplyr, ggplot2, tidyr, readr and a bunch of other packages recommended for the "full" dplyr experience (see https://www.tidyverse.org/packages/). I'm using magrittr for some special pipe operations later.
+pacman::p_load(data.table) #very simple and self-contained
+```
+
+First, recall what pipe format means! We're going to need to know this well for what's coming next...
+
+```{r}
+set.seed(1984)
+mean(head(round(sample(rnorm(1000), 100), digits = 2)))
+
+set.seed(1984)
+rnorm(1000) %>% #the pipe operator
+  sample(100) %>% 
+  round(digits = 2) %>% #the first argument is passed in automatically.
+  head %>%
+  mean
+```
+
+Before we start using `data.table`, note that it is automatically multithreaded. Read [here](https://www.rdocumentation.org/packages/data.table/versions/1.12.8/topics/setDTthreads).
+
+```{r}
+getDTthreads()
+```
+
+and `dplyr` is not. However, there is a [multithreaded dplyr](https://multidplyr.tidyverse.org/articles/multidplyr.html) but we won't cover it.
+
+We first instantiate the upgraded data.frame objects in both libraries:
+
+```{r}
+diamonds_tbl = as_tibble(diamonds) #not necessary to cast because dplyr does the conversion automatically after using any dplyr function
+diamonds_dt = data.table(diamonds) #absolutely necessary
+```
+
+What happens during the data frame conversion?
+
+```{r}
+class(diamonds_tbl)
+class(diamonds_dt)
+```
+
+Note how these are implemented as class extensions of R's `data.frame` as to allow for background compatibility and not break the API. Inheritance is a good thing! 
+
+Both packages have nicer default ways of showing the data:
+
+```{r}
+diamonds_tbl #run this in the console, not inside the chunk
+diamonds_dt #run this in the console, not inside the chunk
+```
+
+Beginning with the simplest munging tasks, subsetting rows. We will see that when possible, data.table attempts to retain base R's syntax as much as possible:
+
+```{r}
+diamonds_tbl %>% 
+  slice(1 : 5)
+
+diamonds_dt[1 : 5] #note: no comma is necessary to say "give me all columns
+```
+
+And subsetting columns:
+
+```{r}
+diamonds_tbl %>% 
+  select(cut, carat, price) #these three only in this order
+
+diamonds_dt[, .(cut, carat, price)] #notice the "." operator - this not base R - it's its own invented syntax!
+
+diamonds_tbl %>% 
+  select(carat, price, cut) #these three only in another order
+
+diamonds_dt[, .(carat, price, cut)]
+
+diamonds_tbl %>% 
+  select(-x) #drop this feature
+
+diamonds_dt[, !"x"]
+#diamonds_dt[, x := NULL] #mutating function (overwrites the data frame)
+
+diamonds_tbl %>% 
+  select(-c(x, y, z)) #drop these features
+diamonds_tbl %>% 
+  select(-x, -y, -z) #drop these features
+
+diamonds_dt[, !c("x", "y", "z")]
+```
+
+How about will rename a column
+
+```{r}
+diamonds_tbl %>% 
+  rename(weight = carat, price_USD = price)
+
+diamonds_dt_copy = copy(diamonds_dt)
+setnames(diamonds_dt_copy, old = c("carat", "price"), new = c("weight", "price_USD")) #the `setnames` function is mutating, i.e. it modifies the data.table object, so I made a copy as to not alter the table for the rest of the demo
+diamonds_dt_copy
+rm(diamonds_dt_copy)
+```
+
+If you want to rearrange the columns...
+
+```{r}
+#In dplyr you pretend to select a subset and then ask for everything else:
+diamonds_tbl %>% 
+  select(carat, price, cut, everything()) #these three in this order first then everything else
+# diamonds_tbl %>% 
+#   select(-carat, everything()) #move carat last (first drop it, and then add it back in with everything)
+
+diamonds_dt_copy = copy(diamonds_dt)
+setcolorder(diamonds_dt_copy, c("carat", "price", "cut")) #as before, the `setcolorder` function is mutating, i.e. it modifies the data.table object, so I made a copy as to not alter the table for the rest of the demo
+diamonds_dt_copy
+rm(diamonds_dt_copy)
+```
+
+Sorting the rows by column(s):
+
+```{r}
+diamonds_tbl %>%
+  arrange(carat) #default is ascending i.e. lowest first
+
+diamonds_dt[order(carat)]
+diamonds_dt_copy = copy(diamonds_dt)
+setorder(diamonds_dt_copy, carat) #as before, the `setorder` function is mutating, i.e. it modifies the data.table object, so I made a copy as to not alter the table for the rest of the demo
+diamonds_dt_copy
+rm(diamonds_dt_copy)
+
+diamonds_tbl %>%
+  arrange(desc(carat)) #switch to descending, i.e. highest first
+
+diamonds_dt[order(-carat)] #and you can do this with `setorder` too
+
+diamonds_tbl %>%
+  arrange(desc(color), clarity, cut, desc(carat)) #multiple sorts - very powerful
+
+diamonds_dt[order(-color, clarity, cut, -carat)] #and you can do this with `setorder` too
+```
+
+The filter method subsets the data based on conditions:
+
+```{r}
+diamonds_tbl %>%
+  filter(cut == "Ideal")
+
+diamonds_dt[cut == "Ideal"]
+
+diamonds_tbl %>%
+  filter(cut == "Ideal") %>%
+  filter(depth < 65) %>%
+  filter(x * y * z > 20)
+diamonds_tbl %>%
+  filter(cut == "Ideal" & depth < 65 & x * y * z > 20)
+
+diamonds_dt[cut == "Ideal" & depth < 65 & x * y * z > 20]
+
+diamonds_tbl %>%
+  filter((cut == "Ideal" | cut == "Premium") & depth < 65 & x * y * z > 20)
+
+diamonds_dt[(cut == "Ideal" | cut == "Premium") & depth < 65 & x * y * z > 20]
+
+diamonds_tbl %>%
+  filter(cut %in% c("Ideal", "Premium") & depth < 65 & x * y * z > 20)
+
+diamonds_dt[cut %in% c("Ideal", "Premium") & depth < 65 & x * y * z > 20]
+```
+
+How about removing all rows that are the same?
+
+```{r}
+diamonds_tbl
+diamonds_tbl %>%
+  distinct
+
+unique(diamonds_dt)
+
+#nice function from data.table:
+uniqueN(diamonds$carat) 
+#273 < 53940 i.e. there's only a few weight measurements that are possible... let's only keep one from each unique carat value
+
+diamonds_tbl %>%
+  distinct(carat, .keep_all = TRUE) #keeps the first row for each unique weight measurement
+
+unique(diamonds_dt, by = "carat")
+```
+
+Sampling is easy
+
+```{r}
+diamonds_tbl %>%
+  sample_n(7)
+
+diamonds_dt[sample(.N, 7)] #.N is a cool function: it is short for `nrow(dt object)`
+#this is legal R code as it's shorthand for sample.int
+?sample
+
+diamonds_tbl %>%
+  sample_frac(1e-3)
+
+diamonds_dt[sample(.N, .N * 1e-3)] #.N is a cool function: it is short for `nrow(dt object)
+```
+
+
+Now for some real fun stuff. Let's create new features with the `mutate` function.
+
+```{r}
+diamonds_tbl %>%
+  mutate(volume = x * y * z) #adds a new column keeping the old ones
+
+diamonds_dt2 = copy(diamonds_dt)
+diamonds_dt2[, volume := x * y * z]
+diamonds_dt2
+
+diamonds_tbl %>%
+  mutate(price_per_carat = price / carat) %>%
+  arrange(desc(price_per_carat))
+
+diamonds_dt2[, price_per_carat := price / carat]
+diamonds_dt2[order(-price_per_carat)]
+rm(diamonds_dt2)
+```
+
+Or rewrite old ones.
+
+```{r}
+diamonds_tbl %>%
+  mutate(cut = substr(cut, 1, 1))
+
+diamonds_dt2 = copy(diamonds_dt)
+diamonds_dt2[, cut := substr(cut, 1, 1)]
+diamonds_dt2
+
+diamonds_tbl %>%
+  mutate(carat = factor(carat))
+
+diamonds_dt2[, carat := factor(carat)]
+diamonds_dt2
+rm(diamonds_dt2)
+```
+
+Here are some more ways to create new variables. Translating to `data.table` is trivial so I omit it:
+
+```{r}
+diamonds_tbl %>%
+  mutate(carat = factor(ntile(carat, 5)))
+diamonds_tbl %>%
+  mutate(carat = percent_rank(carat))
+diamonds_tbl %>%
+  mutate(lag_price = lag(price)) #if this data was a time series
+diamonds_tbl %>%
+  mutate(cumul_price = cumsum(price)) #%>% tail
+```
+
+How about if you want to create a column and drop all other columns in the process?
+
+```{r}
+diamonds_tbl %>%
+  transmute(volume = x * y * z) #adds a new column dropping the old ones
+
+diamonds_dt[, .(volume = x * y * z)]
+```
+
+There are many ways to reshape a dataset. We will see two now and a few functions later when it becomes important. For instance: we can collapse columns together using the `unite` function from package `tidyr` (which should be loaded when you load `dplyr`). We will have a short unit on more exciting and useful reshapings later ("long" to "short" and vice-versa). As far as I know `data.table` has a less elegant... unless someone has a better idea?
+
+```{r}
+diamonds_tbl2 = diamonds_tbl %>%
+  unite(dimensions, x, y, z, sep = " x ")
+diamonds_tbl2
+
+diamonds_dt2 = copy(diamonds_dt)
+diamonds_dt2[, dimensions := paste(x, y, z, sep = " x ")] #mutating
+diamonds_dt2 = diamonds_dt2[, !c("x", "y", "z")]
+diamonds_dt2
+```
+
+We can reverse this operation:
+
+```{r}
+diamonds_tbl2 %>%
+  separate(dimensions, c("x", "y", "z"), sep = " x ")
+rm(diamonds_tbl2)
+
+diamonds_dt2[, c("x", "y", "z") := tstrsplit(dimensions, "x")] #note there's a special optimized function tstrsplit for use in data.table
+diamonds_dt2[, -"dimensions"]
+rm(diamonds_dt2)
+```
+
+There are tons of other packages to do clever things. For instance, here's one that does dummies. Let's convert the color feature to dummies. Again slightly less readable or elegant in `data.table`:
+
+```{r}
+pacman::p_load(sjmisc, snakecase)
+diamonds_tbl %>%
+  to_dummy(color, suffix = "label") %>% #this creates all the dummies
+  bind_cols(diamonds_tbl) %>% #now we have to add all the original data back in
+  select(-matches("_"), everything()) %>% #this puts the dummies last
+  select(-color) #finally we can drop color
+
+cbind(
+  diamonds_dt[, -"color"], 
+  to_dummy(diamonds_dt[, .(color)], suffix = "label")
+)
+```
+
+
+What if you want to create a new variable based on functions only run on subsets of the data. This is called "grouping". Grouping only makes sense for categorical variables. (If you group on a continuous variable, then chances are you'll have $n$ different groups because you'll have $n$ unique values).
+
+For instance:
+
+```{r}
+diamonds_tbl %>%
+  group_by(color)
+
+diamonds_dt[,, by = color]
+```
+
+Nothing happened... these were directives to do things a bit differently with the addition of other logic. So after you group, you can now run operations on each group like they're their own sub-data frame. Usually, you want to *summarize* data by group. This means you take the entire sub-data frame and run one metric on it and return only those metrics (i.e. shrink $n$ rows to $L$ rows). This sounds more complicated than it is and it is where data wrangling really gets fun. 
+
+Here are a few examples:
+
+```{r}
+diamonds_tbl %>%
+  group_by(color) %>%
+  summarize(avg_price = mean(price))
+
+diamonds_dt[, .(avg_price = mean(price)), by = color][order(color)] #chaining / piping [...][...][...] etc
+#where did all the other rows and columns go???
+
+diamonds_tbl %>%
+  group_by(color) %>%
+  summarize(avg_price = mean(price), sd_price = sd(price), count = n())
+
+diamonds_dt[, .(avg_price = mean(price), sd_price = sd(price), count = .N), by = color][order(color)]
+
+diamonds_tbl %>%
+  group_by(color) %>%
+  summarize(min_price = min(price), med_price = median(price), max_price = max(price))
+
+diamonds_dt[, .(min_price = min(price), med_price = median(price), max_price = max(price)), by = color][order(color)]
+```
+
+Sometimes you want to do fancier things like actually run operations on the whole sub-data frame using `mutate`. If the function is a single metric, then that metric is then duplicated across the whole sub data frame.
+
+```{r}
+diamonds_tbl %>%
+  group_by(color) %>%
+  mutate(avg_price_for_color = mean(price))
+#creates a new feature based on running the feature only within group
+
+diamonds_dt2 = copy(diamonds_dt)
+diamonds_dt2[, avg_price_for_color := mean(price), by = color]
+diamonds_dt2
+rm(diamonds_dt2)
+```
+
+So that's kind of like duplicating a summary stat. Here's something more fun: actually creating a new vector:
+
+```{r}
+diamonds_tbl %>%
+  group_by(color) %>%
+  mutate(price_rank_within_color = dense_rank(price)) #creates a new feature based on running the feature only within group
+
+diamonds_dt2 = copy(diamonds_dt)
+diamonds_dt2[, price_rank_within_color := frankv(price, ties.method = "dense"), by = color]
+diamonds_dt2
+rm(diamonds_dt2)
+```
+
+What if we want to get the first row in each category?
+
+```{r}
+diamonds_tbl %>%
+  group_by(color) %>%
+  slice(1)
+
+diamonds_dt[, .SD[1], by = color][order(color)]
+```
+
+The `.SD` variable is short for "sub dataframe" and it's a stand-in for the pieces of the dataframe for each color as it loops over the colors. So `.SD[1]` will be first row in the sub dataframe. The reason why the matrices come out different is that the order of the rows in data.table changes based on optimizations. We'll see some of this later. I'm also unsure why it moved the `color` column to the front.
+
+What about first and last?
+
+```{r}
+diamonds_tbl %>%
+  group_by(color) %>%
+  slice(1, n())
+
+diamonds_dt[, .SD[c(1, .N)], by = color]
+```
+
+How about the diamond with the highest price by color?
+
+```{r}
+diamonds_tbl %>%
+  group_by(color) %>%
+  arrange(price) %>%
+  slice(n())
+
+diamonds_dt[, .SD[which.max(price)], by = color]
+```
+
+We've seen `data.table`'s preference for mutating functions. Here is a pipe command from package `magrittr` that makes the functions mutating. 
+
+```{r}
+diamonds_tbl2 = diamonds_tbl
+diamonds_tbl2 = diamonds_tbl2 %>%
+  select(-x, -y, -z) %>%
+  filter(carat < 0.5) %>%
+  arrange(carat, cut, color)
+diamonds_tbl2
+
+diamonds_tbl2 = diamonds_tbl
+diamonds_tbl2 %<>% #pipe and overwrite (short for what's above)
+  select(-x, -y, -z) %>%
+  filter(carat < 0.5) %>%
+  arrange(carat, cut, color)
+diamonds_tbl2
+rm(diamonds_tbl2)
+```
+
+This is as far we will go with data wrangling right now.
+
+Let's benchmark a few core features of both packages using the package "microbenchmark". To do so, let's create a dataframe that's very big:
+
+```{r}
+Nbig = 2e6
+diamonds_tbl_big = diamonds_tbl %>%
+  sample_n(Nbig, replace = TRUE)
+diamonds_dt_big = data.table(diamonds_tbl_big) #just to make sure we have the same data
+diamonds_big = data.frame(diamonds_tbl_big) #ensure that it is a base R object
+```
+
+How about we write this dataframe to the hard drive as a CSV? We just call the microbenchmark method which takes in a list of keys => functions. It then runs those functions a certain number of times and outputs runtime statistics.
+
+```{r}
+pacman::p_load(microbenchmark)
+microbenchmark(
+  base_R = write.csv(diamonds_big, "diamonds_big.csv"),
+  tidyverse = write_csv(diamonds_tbl_big, "diamonds_big.csv"),
+  data.table = fwrite(diamonds_dt_big, "diamonds_big.csv"),
+    times = 1
+)
+```
+
+Game over data.table wins
+
+How about we read this dataframe from the hard drive as a CSV?
+
+```{r}
+microbenchmark(
+  base_R = read.csv("diamonds_big.csv"),
+  tidyverse = read_csv("diamonds_big.csv"),
+  data.table = fread("diamonds_big.csv"),
+    times = 1
+)
+```
+
+Game over data.table wins. Cleanup the huge file:
+
+```{r}
+file.remove("diamonds_big.csv")
+```
+
+What about for creating new variables?
+
+```{r}
+microbenchmark(
+  base_R = {diamonds_big$log_price = log(diamonds_big$price)},
+  tidyverse = {diamonds_tbl_big %<>% mutate(log_price = log(price))},
+  data.table = diamonds_dt_big[, log_price := log(price)],
+    times = 10
+)
+```
+
+About the same. How about grouping and summarizing? No easy one-liner in base R. So we just compare the two packages:
+
+
+```{r}
+microbenchmark(
+  tidyverse = {diamonds_tbl_big %>% group_by(color) %>% summarize(avg_price = mean(price))},
+  data.table = diamonds_dt_big[, .(avg_price = mean(price), by = color)],
+    times = 10
+)
+```
+
+I won't keep announcing the winner to not embarass the loser...
+
+How about sorting?
+
+```{r}
+microbenchmark(
+  base_R = diamonds_big[order(diamonds_big$price), ],
+  tidyverse = {diamonds_tbl_big %>% arrange(price)},
+  data.table = diamonds_dt_big[order(price)],
+    times = 10
+)
+```
+How about filtering?
+
+```{r}
+microbenchmark(
+  base_R = diamonds_big[diamonds_big$price < 1000, ],
+  tidyverse = {diamonds_tbl_big %>% filter(price < 1000)},
+  data.table = diamonds_dt_big[price < 1000],
+    times = 30
+)
+```
+
+Let's do this again but first "key" the price column which is what you would do if you are doing lots of searches. For those of you who took / are taking the SQL class, you know what this basically is doing. If not, don't worry about it.
+
+```{r}
+setkey(diamonds_dt_big, price)
+
+microbenchmark(
+  base_R = diamonds_big[diamonds_big$price < 1000, ],
+  tidyverse = {diamonds_tbl_big %>% filter(price < 1000)},
+  data.table = diamonds_dt_big[price < 1000],
+    times = 30
+)
+```
+
+data.table wins by even a wider margin now.
+
+# Wide and Long Dataframe Formats
+
+Another one of the core data munging skills is to transform a data frame from wide to long (most common) and from long back to wide (less common). Let's learn this by way of example.
+
+```{r}
+pacman::p_load(data.table, tidyverse, magrittr)
+summary(storms)
+head(storms)
+```
+
+Let's first create a few variables that are of interest:
+
+```{r}
+storms %<>% 
+  mutate(wind_pct_avg = wind / mean(wind, na.rm = TRUE) * 100) %>%
+  mutate(pressure_pct_avg = pressure / mean(pressure, na.rm = TRUE) * 100) %>%
+  mutate(tropicalstorm_force_diameter_pct_avg = tropicalstorm_force_diameter / mean(tropicalstorm_force_diameter, na.rm = TRUE) * 100) %>%
+  mutate(hurricane_force_diameter_pct_avg = hurricane_force_diameter / mean(hurricane_force_diameter, na.rm = TRUE) * 100)
+ggplot(storms) + 
+  aes(wind_pct_avg) + 
+  geom_histogram()
+```
+
+Now let's take a look at these four variables we created for a storm we all remember and create a time period variable. I'll also instantiate a data.table object for later:
+
+```{r}
+sandy_wide_tbl = storms %>% 
+  filter(name == "Sandy") %>%
+  select(wind_pct_avg, pressure_pct_avg, tropicalstorm_force_diameter_pct_avg, hurricane_force_diameter_pct_avg) %>% #we only care about our variables
+  mutate(period = 1 : n()) %>%
+  select(period, everything()) #reorder
+sandy_wide_dt = data.table(sandy_wide_tbl)
+sandy_wide_dt
+```
+
+This is called a "repeated measures" dataset or a "time series" and it is one of the most common data frame types. Unfortunately, we didn't have enough classtime to do a unit on time series. It really deserves its own class!
+
+Regardless, it would be nice to be able to visualize It would be nice to look at the four variables we just created by time period. We can do this below:
+
+```{r}
+ggplot(sandy_wide_tbl) + 
+  aes(x = period) + 
+  geom_line(aes(y = wind_pct_avg), col = "red") + 
+  geom_line(aes(y = pressure_pct_avg), col = "green") + 
+  geom_line(aes(y = tropicalstorm_force_diameter_pct_avg), col = "blue") + 
+  geom_line(aes(y = hurricane_force_diameter_pct_avg), col = "grey") +
+  #make legend code
+  ylab("% over average")
+```
+
+Notice how that was a lot of lines of code which aren't so maintainable and we don't have a legend. Legends are built automatically in `ggplot2` when we set color to a variable. This means we somehow have to let the four variables we care about be there own categorical variable.
+
+First note that the dataframe we have is in what's called "wide format" or "unstacked" meaning each row is an observation and the columns are its features. This is exactly the format of dataframe that we've been studying in this class. This is the format we humans prefer to read and it is the format for many important analyses and the format for modeling.
+
+However, to get what we want above involves a "reshaping" our dataframe into another canonical form, one that is easier for machines to read, a format called "long format" or "narrow" or "stacked" which looks like this:
+
+| Period      | Value       | variable     |
+| ----------- | ----------- | -------------|
+| 1           | 56.08       | wind_pct_avg |
+| 2           | 65.43       | wind_pct_avg |
+etc.
+
+Sometimes this format is required for situations, so we should get used to "pivoting" between the two formats. 
+
+We first go from wide to long. To do so, we identify the "id variables" which get their own row per category and the measurement variables which get their own entire subdataframe.
+
+```{r}
+sandy_long_tbl = pivot_longer(
+  sandy_wide_tbl, 
+  cols = -period, #measurement variables: all column except period and period is then the ID variable
+  names_to = "metric", #default is "name"
+  values_to = "val" #default is "value"
+)
+sandy_long_dt = melt(
+  sandy_wide_dt,
+  id.vars = "period",
+  measure.vars = c("wind_pct_avg", "pressure_pct_avg", "tropicalstorm_force_diameter_pct_avg", "hurricane_force_diameter_pct_avg"),
+  variable.name = "metric",
+  value.name = "val"
+)
+sandy_long_tbl
+sandy_long_dt
+```
+
+Same output but note the difference in sorting: `tidyverse` sorts on the id variables first and `data.table` sorts on the measurements i.e. cbinding the subdataframes.
+
+Now that it's in long format, the visualization code becomes very simple:
+
+```{r}
+ggplot(sandy_long_dt) +
+  geom_line(aes(x = period, y = val, color = metric)) +
+  ylab("% over average")
+```
+
+So beautiful!
+
+Now we go from long to wide:
+
+```{r}
+sandy_wide_tbl2 = pivot_wider(
+  sandy_long_tbl,
+  id_cols = period, 
+  names_from = metric,
+  values_from = val
+)
+sandy_wide_dt2 = dcast(
+  sandy_long_dt,
+  period ~ metric, #lhs is id and rhs is measurement variables
+  value.var = "val" #the function can guess "val" has to be the cell values so it's not needed
+)
+sandy_wide_tbl2
+sandy_wide_dt2
+```
+
+Who's faster?
+
+```{r}
+pacman::p_load(microbenchmark)
+microbenchmark(
+  wide_to_long_tidy = pivot_longer(
+    sandy_wide_tbl, 
+    cols = -period,
+    names_to = "metric",
+    values_to = "val"
+  ),
+  wide_to_long_dt = melt(
+    sandy_wide_dt,
+    id.vars = "period",
+    measure.vars = c("wind_pct_avg", "pressure_pct_avg", "tropicalstorm_force_diameter_pct_avg", "hurricane_force_diameter_pct_avg"),
+    variable.name = "metric",
+    value.name = "val"
+  ),
+  long_to_wide_tidy = pivot_wider(
+    sandy_long_tbl,
+    id_cols = period, 
+    names_from = metric,
+    values_from = val
+  ),
+  long_to_wide_dt = dcast(
+    sandy_long_dt,
+    period ~ metric,
+    value.var = "val"
+  ),
+  times = 50
+)
+```
+
+Looks like ``data.table::melt`` is 25-30x faster than tidyverse's pivot and ``data.tabe::dcast` is 2-3x faster than tidyverse's pivot.
+
+
