@@ -18,7 +18,7 @@ NOT REQUIRED: After you're done, you have the option to compile this file into a
 
 # Basic R Skills
 
-* Print out the numerical constant pi with ten digits after the decimal point using the internal constant `pi`.
+* Print out the numerical constant pi with ten digits after the decimal point using the internal constant `pi` and the `options` command. Make sure you reset the `options` afterwards.
 
 ```{r}
 #TO-DO

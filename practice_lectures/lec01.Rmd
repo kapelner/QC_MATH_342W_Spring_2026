@@ -1,18 +1,7 @@
 ---
 title: "Practice Lecture 1 MATH 342W Queens College"
 author: "Professor Adam Kapelner"
-date: "Jan 28, 2025"
 ---
-
-You can get started with this cheatsheet:
-https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf
-
-Acknowledgement: I would like to thank Professor Andreas Buja at Wharton as I cribbed lots of his notes. Here's the sources:
-http://stat.wharton.upenn.edu/~buja/STAT-470-503-770/CHAPTERS/
-http://stat.wharton.upenn.edu/~buja/STAT-961/
-
-as well as Yonatan Rosenblatt previously of Ben Gurion University:
-http://www.john-ros.com/Rcourse
 
 ## Basic R
 
