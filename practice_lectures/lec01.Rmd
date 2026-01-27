@@ -29,7 +29,7 @@ What is RStudio?
 File types:
 
 * The standard R script has a .R extension
-* This file if you note has an .Rmd extension meeaning "R Markdown". Markdown is a way of typestting simple documents with basic code directives. You can read up on this by yourself. "R Markdown" is a document type that combines R code within markdown documents where the R code is in "chunks".
+* This file if you note has an .Rmd extension meaning "R Markdown". Markdown is a way of typesetting simple documents with basic code directives. You can read up on this by yourself. "R Markdown" is a document type that combines R code within markdown documents where the R code is in "chunks".
 
 Let's see some R! Since R is interpreted, you can run commands directly into its command line by using ctrl-enter line-by-line or ctrl-shift-enter for the entire "chunk":
 
@@ -459,8 +459,8 @@ a
 There is also a switch in R. It is _not_ an official keyword (despite RStudio's endorsement), but it is useful for non-vector character expressions:
 
 ```{r}
-ch = "two"
-#ch = c("one", "two") #switch is not vectorized (ironic since everything else in R is vectorized)
+ch = "four"
+ch = c("one", "two") #switch is not vectorized (ironic since everything else in R is vectorized)
 switch(ch,
    "one" = 1,
    "two" = 2,

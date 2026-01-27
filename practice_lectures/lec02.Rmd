@@ -269,7 +269,7 @@ Now, after the library invocation we can do the following and treat it as a norm
 as.fractions(pi)
 ```
 
-Is this always a good idea? No... everytime you call `library` it "dirties" the namespace by putting all the functions there and rewriting over functions there previously. This is bad because you are more likely to get namespace conflicts. For instance. Let's say package `kapelner` had a weird `sample` function. This would be clear:
+Is this always a good idea? No... every time you call `library` it "dirties" the namespace by putting all the functions there and rewriting over functions there previously. This is bad because you are more likely to get namespace conflicts. For instance. Let's say package `kapelner` had a weird `sample` function. This would be clear:
 
 ```{r}
 v = rnorm(100)
