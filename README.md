@@ -33,7 +33,7 @@ My theory lectures are following my previous class notes (see [here](https://git
 * Homework 4 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/homeworks/hw04/hw04t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/homeworks/hw04/hw04t.pdf) (due 4/21 11:59PM pushed to your github repo)
 * Homework 3 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/homeworks/hw03/hw03t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/homeworks/hw03/hw03t.pdf) (due 3/19 6PM pushed to your github repo)
 * Homework 2 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/homeworks/hw02/hw02t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/homeworks/hw02/hw02t.pdf) (due 2/28 noon pushed to your github repo) -->
-* Homework 1 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/homeworks/hw01/hw01t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/homeworks/hw01/hw01t.pdf) (due 1/31 noon pushed to your github repo)
+* Homework 1 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/homeworks/hw01/hw01t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/homeworks/hw01/hw01t.pdf) (due 2/7 pushed to your github repo)
 
 ## Writing Assignments
 * Modeling Essay Preassignment [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/writing_assignments/modeling_essay_revised.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/writing_assignments/modeling_essay_revised.pdf) due 3/17 11:59PM by email
