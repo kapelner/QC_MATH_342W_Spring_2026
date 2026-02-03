@@ -8,7 +8,7 @@ We will use github and git for sharing code from this repository which you will 
 
 ## Lectures
 
-My theory lectures are following my previous class notes (see [here](https://github.com/kapelner/QC_Math_342W_Spring_2022)) unless specified otherwise. "Practice lectures" which consist of demos in the [R language](https://www.r-project.org/) change year-to-year and are found in this repository [here](https://github.com/kapelner/QC_Math_342W_Spring_2026/tree/main/practice_lectures) and are numbered by the lecture number. Note that some lectures do not have demos.
+My theory lectures are following my previous class notes (see [here](https://github.com/kapelner/QC_Math_342W_Spring_2022)) unless specified otherwise. "Practice lectures" which consist of demos in the [R language](https://www.r-project.org/) change year-to-year and are found in this repository [here](https://github.com/kapelner/QC_Math_342W_Spring_2026/tree/main/practice_lectures) and are numbered by the lecture number. Note that some lectures do not have demos so some lecture numbers are skipped.
 
 ## Labs
 
