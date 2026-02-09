@@ -2,14 +2,99 @@
 title: "Lab 4 MATH 342W"
 author: "Your Name Here"
 output: pdf_document
-date: "11:59PM March 2"
 ---
 
-Let's load up the Galton data again
+#The OG: Galton's Regression
+
+
+We are now going to repeat one of the first linear model building exercises in history --- that of Sir Francis Galton in 1886. First load up package `HistData`.
+
 ```{r}
 pacman::p_load(HistData)
+```
+
+In it, there is a dataset called `Galton`. Load it up.
+
+```{r}
 data(Galton)
 ```
+
+You now should have a data frame in your workspace called `Galton`. Summarize this data frame and write a few sentences about what you see. Make sure you report n, p and a bit about what the columns represent and how the data was measured. See the help file `?Galton`.
+p is 1 and n is 928 the number of observations  
+
+```{r}
+pacman::p_load(skimr)
+skim(Galton)
+```
+
+TO-DO
+
+Find the average height (include both parents and children in this computation).
+
+```{r}
+#TO-DO
+```
+
+If you were predicting child height from parent and you were using the null model, what would the RMSE be of this model be?
+
+```{r}
+#TO-DO
+```
+
+Note that in Math 241 you learned that the sample average is an estimate of the "mean", the population expected value of height. We will call the average the "mean" going forward since it is probably correct to the nearest tenth of an inch with this amount of data.
+
+Run a linear model attempting to explain the childrens' height using the parents' height. Use `lm` and use the R formula notation. Compute and report b_0, b_1, RMSE and R^2. 
+
+```{r}
+#TO-DO
+```
+
+Interpret all four quantities: b_0, b_1, RMSE and R^2. Use the correct units of these metrics in your answer.
+
+TO-DO
+
+How good is this model? How well does it predict? Discuss.
+
+TO-DO
+
+It is reasonable to assume that parents and their children have the same height? Explain why this is reasonable using basic biology and common sense.
+
+TO-DO
+
+If they were to have the same height and any differences were just random noise with expectation 0, what would the values of beta_0 and beta_1 be?
+
+TO-DO
+
+Let's plot (a) the data in D as black dots, (b) your least squares line defined by b_0 and b_1 in blue, (c) the theoretical line beta_0 and beta_1 if the parent-child height equality held in red and (d) the mean height in green.
+
+```{r}
+pacman::p_load(ggplot2)
+ggplot(Galton, aes(x = parent, y = child)) + 
+  geom_point() + 
+  geom_jitter() +
+  geom_abline(intercept = b_0, slope = b_1, color = "blue", size = 1) +
+  geom_abline(intercept = 0, slope = 1, color = "red", size = 1) +
+  geom_abline(intercept = avg_height, slope = 0, color = "darkgreen", size = 1) +
+  xlim(63.5, 72.5) + 
+  ylim(63.5, 72.5) +
+  coord_equal(ratio = 1)
+```
+
+Fill in the following sentence: 
+
+TO-DO: Children of short parents became ... on average and children of tall parents became ... on average.
+
+Why did Galton call it "Regression towards mediocrity in hereditary stature" which was later shortened to "regression to the mean"?
+
+TO-DO
+
+Why should this effect be real?
+
+TO-DO
+
+You now have unlocked the mystery. Why is it that when modeling with y continuous, everyone calls it "regression"? Write a better, more descriptive and appropriate name for building predictive models with y continuous.
+
+TO-DO
 
 If you were predicting child height from parent and you were using the null model, what would the Rsq be of this model? Compute from first principles.
 
@@ -50,12 +135,16 @@ Why did RMSE change but Rsq did not change?
 #TO-DO
 
 
-Create a dataset D which we call `Xy` such that the linear model has R^2 about 50\% and RMSE approximately 1.
+Now convert the units from inches to feet in the dataset D. Run the regression again and report RMSE and R^2
 
 ```{r}
-x = #TO-DO
-y = #TO-DO
-Xy = data.frame(x = x, y = y)
+#TO-DO
+```
+
+Clear the workspace
+
+```{r}
+rm(list = ls())
 ```
 
 Extra credit but required for masters students: create a dataset D and a model that can give you R^2 arbitrarily close to 1 i.e. approximately 1 - epsilon but RMSE arbitrarily high i.e. approximately M.
@@ -78,6 +167,14 @@ summary(lm(y ~ x))$r.squared
 #now check dependence AKA "association" visually
 ggplot(data.frame(x = x, y = y)) + geom_point(aes(x = x, y = y))
 ```
+
+Clear the workspace
+
+```{r}
+rm(list = ls())
+```
+
+# Multivariate linear regression
 
 Write a function `my_ols` that takes in `X`, a matrix with with p columns representing the feature measurements for each of the n units, a vector of n responses `y` and returns a list that contains the `b`, the p+1-sized column vector of OLS coefficients, `yhat` (the vector of n predictions), `e` (the vector of n residuals), `df` for degrees of freedom of the model, `SSE`, `SST`, `MSE`, `RMSE` and `Rsq` (for the R-squared metric). Internally, you cannot use `lm` or any other package; it must be done manually. You should throw errors if the inputs are non-numeric or not the same length. Or if `X` is not otherwise suitable. You should also name the class of the return value `my_ols` by using the `class` function as a setter. No need to create ROxygen documentation here.
 

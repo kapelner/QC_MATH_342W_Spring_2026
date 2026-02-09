@@ -19,9 +19,9 @@ My theory lectures are following my previous class notes (see [here](https://git
 * [Lab 8, due 4/23](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab08.Rmd) pushed to your github repo
 * [Lab 7, due 4/6](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab07.Rmd) pushed to your github repo
 * [Lab 6, due 3/30](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab06.Rmd) pushed to your github repo
-* [Lab 5, due 3/18](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab05.Rmd) pushed to your github repo
-* [Lab 4, due 3/2](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab04.Rmd) pushed to your github repo
-* [Lab 3, due 2/16](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab03.Rmd) pushed to your github repo-->
+* [Lab 5, due 3/18](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab05.Rmd) pushed to your github repo-->
+* [Lab 4, due 2/22](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab04.Rmd) pushed to your github repo
+* [Lab 3, due 2/15](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab03.Rmd) pushed to your github repo
 * [Lab 2, due 2/8](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab02.Rmd) pushed to your github repo
 * [Lab 1, due 2/1](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab01.Rmd) pushed to your github repo
 
