@@ -147,36 +147,6 @@ NAME: \line(1,0){380}
 \end{enumerate}
 
 
-\problem{These are questions about multivariate linear model fitting using the least squares algorithm.}
-
-\begin{enumerate}
-
-\hardsubproblem{Derive $\partialop{\c}{\c^\top A \c}$ where $\c \in \reals^n$ and $A \in \reals^{n \times n}$ but \textit{not} symmetric. Get as far as you can.}\spc{8}
-
-\easysubproblem{Given matrix $X \in \reals^{n \times (p+1)}$, full rank and first column consisting of the $\onevec_n$ vector, rederive the least squares solution $\b$ (the vector of coefficients in the linear model shipped in the prediction function $g$). No need to rederive the facts about vector derivatives.}\spc{10}
-
-\intermediatesubproblem{Consider the case where $p = 1$. Show that the solution for $\b$ you just derived in (b) is the same solution that we proved for simple regression. That is, the first element of $\b$ is the same as $b_0 = \ybar - r \frac{s_y}{s_x}\xbar$ and the second element of $\b$ is $b_1 = r \frac{s_y}{s_x}$.} \spc{7}
-
-\easysubproblem{If $X$ is rank deficient, how can you solve for $\b$? Explain in English.} \spc{2}
-
-\hardsubproblem{Prove $\rank{X} =\rank{X^\top X}$.}\spc{9}
-
-%\hardsubproblem{Given matrix $X \in \reals^{n \times (p+1)}$, full rank and first column consisting of the $\onevec_n$ vector, now consider cost multiples (\qu{weights}) $c_1, c_2, \ldots, c_n$ for each mistake $e_i$. As an example, previously the mistake for the 17th observation was $e_{17} := y_{17} - \hat{y}_{17}$ but now it would be $e_{17} := c_{17} (y_{17} - \hat{y}_{17})$.  Derive the weighted least squares solution $\b$. No need to rederive the facts about vector derivatives. Hints: (1) show that SSE is a quadratic form with the matrix $C$ in the middle (2) Split this matrix up into two pieces i.e. $C = C^{\half} C^{\half}$, distribute and then foil (3) note that a scalar value equals its own transpose and (4) use the vector derivative formulas.}\spc{10}
-
-
-\intermediatesubproblem{[MA] If $p=1$, prove $r^2 = R^2$ i.e. the linear correlation is the same as proportion of sample variance explained in a least squares linear model.}\spc{6}
-
-\intermediatesubproblem{Prove that $g(\bracks{1 ~\xbar_1~ \xbar_2~ \ldots~ \xbar_p}) =\bar{y}$ in OLS.}\spc{7}
-
-\intermediatesubproblem{Prove that $\bar{e} = 0$ in OLS.}\spc{10}
-
-\hardsubproblem{If you model $\y$ with one categorical nominal variable that has levels $A, B, C$, prove that the OLS estimates look like $\ybar_A$ if $x = A$, $\ybar_B$ if $x = B$ and $\ybar_C$ if $x = C$. You can choose to use an intercept or not. Likely without is easier.}\spc{10}
-
-
-\intermediatesubproblem{[MA] Prove that the OLS model always has $R^2 \in \zeroonecl$.}\spc{5}
-
-\end{enumerate}
-
 
 
 \end{document}
