@@ -257,30 +257,3 @@ Is this shape expected? Explain.
 #TO-DO
 
 
-Now repeat the exercise above except use 5-fold CV (K=5 cross validation) for each p. The code below will also plot the oos RMSE. This oos RMSE curve should be similar to the curve in the above problem, but now it will be more stable. 
-
-
-```{r}
-K = 5
-oos_e_by_p_k = matrix(NA, nrow = n, ncol = n) #save all residuals here - each row are the residuals for number of features = j
-
-#TODO
-
-
-#now plot it
-pacman::p_load(ggplot2)
-ggplot(data.frame(
-    s_e = apply(ooss_e_by_p_k, 1, sd), #we are taking the sd over all n oos residuals
-    p = 1 : n_train
-  )) +
-  geom_line(aes(x = p, y = s_e))
-
-```
-
-Even though the concept of confidence intervals (CIs) will not be on the midterm, construct 95% CIs for each of the oosRMSE measurements by number of features, p. A CI is a real-number interval with a lower bound and upper bound. The formula for the CI is [s_e - 2 * s_s_e, s_e + 2 * s_s_e].
-
-
-```{r}
-#TODO
-```
-
