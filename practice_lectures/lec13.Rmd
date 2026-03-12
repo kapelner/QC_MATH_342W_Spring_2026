@@ -232,13 +232,14 @@ adult = na.omit(adult) #remove any observations with missingness
 #to make the exercise easier I'm going to delete two features - it's more work to get oos validation working if these two stay in which I can explain later
 adult$occupation = NULL
 adult$native_country = NULL
+adult$income = ifelse(adult$income == ">50K", 1, 0)
 skimr::skim(adult)
 ```
 
 What is g_0?
 
 ```{r}
-mean(as.numeric(adult$income == ">50K"))
+mean(adult$income)
 ```
 
 Let's use samples of 5,000 to run experiments:
