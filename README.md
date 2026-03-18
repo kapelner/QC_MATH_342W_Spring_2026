@@ -42,7 +42,7 @@ My theory lectures are following my previous class notes (see [here](https://git
 
 ## Exams
 
-* Midterm I is March 18 (in lecture)
+* Midterm I is March 18 (in lecture) [(exam)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/exams/midterm1/midterm1.pdf) [(solutions)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/exams/midterm1/midterm1_solutions.pdf)
 * Midterm II is May 13 (in lecture)
 * There is no final exam on the CUNYFirst date during finals week
 
