@@ -4,7 +4,7 @@
 
 
 \newtoggle{solutions}
-%\toggletrue{solutions}
+\toggletrue{solutions}
 
 \newcommand{\instr}{\small Your answer will consist of a lowercase string (e.g. \texttt{aebgd}) where the order of the letters does not matter. \normalsize}
 
@@ -178,7 +178,11 @@ Assume SSE is the error metric going forward.
 \subquestionwithpoints{3} Write a formula to find the in-sample error of the model $g_A$. Be as explicit as possible using the notation given in this problem.
 
 \iftoggle{solutions}{\inred{
-$(\y_A - g_A(\X_A))^\top (\y_A - g_A(\X_A)) = \sum_{i=1}^n (y_{A,i} - g_A(\X_A)_i)^2$\\
+
+\beqn
+(\y_A - g_A(\X_A))^\top (\y_A - g_A(\X_A)) = \sum_{i \in A} (y_{i} - g_A(\x_{i \cdot}))^2
+\eeqn
+
 The sum notation can be used for the next three questions as well.
 }}{~\spc{1}}
 
@@ -354,14 +358,14 @@ Here are the first six rows:
     \centering\small\inred{
 \begin{tabular}{ccccccccccc}
 \hline
-(Intercept) & trt\_exp & cell\_large & cell\_small & cell\_squam & time & status & karno & diagtime & age & prior \\
+(Intercept) & trt\_exp & cell\_large & cell\_small & cell\_squam & status & karno & diagtime & age & prior \\
 \hline
-1 & 1 & 0 & 1 & 0 & 29 & 1 & 40 & 8 & 67 & 0 \\
-1 & 1 & 0 & 0 & 0 & 186 & 1 & 90 & 3 & 60 & 0 \\
-1 & 0 & 0 & 0 & 0 & 12 & 1 & 50 & 4 & 63 & 10 \\
-1 & 0 & 1 & 0 & 0 & 553 & 1 & 70 & 2 & 47 & 0 \\
-1 & 0 & 0 & 0 & 1 & 11 & 1 & 70 & 11 & 48 & 10 \\
-1 & 1 & 0 & 0 & 1 & 25 & 1 & 20 & 36 & 63 & 0 \\
+1 & 1 & 0 & 1 & 0 & 1 & 40 & 8 & 67 & 0 \\
+1 & 1 & 0 & 0 & 0 &  1 & 90 & 3 & 60 & 0 \\
+1 & 0 & 0 & 0 & 0 &  1 & 50 & 4 & 63 & 10 \\
+1 & 0 & 1 & 0 & 0 &  1 & 70 & 2 & 47 & 0 \\
+1 & 0 & 0 & 0 & 1 &  1 & 70 & 11 & 48 & 10 \\
+1 & 1 & 0 & 0 & 1 &  1 & 20 & 36 & 63 & 0 \\
 \hline
 \end{tabular}}
 \end{table}
