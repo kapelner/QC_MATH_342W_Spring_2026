@@ -178,28 +178,29 @@ Assume SSE is the error metric going forward.
 \subquestionwithpoints{3} Write a formula to find the in-sample error of the model $g_A$. Be as explicit as possible using the notation given in this problem.
 
 \iftoggle{solutions}{\inred{
-$(\y_A - g_A(\X_A))^2$
+$(\y_A - g_A(\X_A))^\top (\y_A - g_A(\X_A)) = \sum_{i=1}^n (y_{A,i} - g_A(\X_A)_i)^2$\\
+The sum notation can be used for the next three questions as well.
 }}{~\spc{1}}
 
 \subquestionwithpoints{3} Write a formula to find the \textit{most accurate} measure of the oos error of the model $g_A$. Be as explicit as possible using the notation given in this problem.
 
 \iftoggle{solutions}{\inred{
-$\squared{\y_{B \cup C} - g_A(\X_{B \cup C})}$
+$(\y_{B \cup C} - g_A(\X_{B \cup C}))^\top (\y_{B \cup C} - g_A(\X_{B \cup C}))$
 }}{~\spc{1}}
 
 \subquestionwithpoints{3} Now assume $n$ is very large, i.e. $n >> 300$. Write a formula to find the \textit{most accurate} measure of the oos error of the model $g_A$. Be as explicit as possible using the notation given in this problem.
 
 \iftoggle{solutions}{\inred{
-$\squared{\y - g_A(\X)}$
+$(\y - g_A(\X))^\top (\y - g_A(\X))$
 }}{~\spc{1}}
 
 \subquestionwithpoints{3} Write a formula to find an estimate of the oos error of the model $g$ using $K=3$-fold cross validation. Be as explicit as possible using the notation given in this problem.
 
 \iftoggle{solutions}{\inred{
 \beqn
-\squared{\y_{C} - g_{A \cup B}(\X_C)} +
-\squared{\y_{B} - g_{A \cup C}(\X_B)} +
-\squared{\y_{A} - g_{B \cup C}(\X_A)}
+&&(\y_{C} - g_{A \cup B}(\X_C))^\top (\y_{C} - g_{A \cup B}(\X_C)) +\\
+&&(\y_{B} - g_{A \cup C}(\X_B))^\top (\y_{B} - g_{A \cup C}(\X_B)) +\\
+&&(\y_{A} - g_{B \cup C}(\X_A))^\top (\y_{A} - g_{B \cup C}(\X_A))
 \eeqn
 }}{~\spc{4}}
 \pagebreak
@@ -326,7 +327,7 @@ R^2 := 1 - \frac{SSE}{SST} = 1 - \frac{SSE}{(n-1) s^2_y} = 1 - \frac{2482093}{(1
 \eeqn
 }}{~\spc{3}}
 
-\subquestionwithpoints{8} Assume there was no overfitting. What is the \textit{least likely} source of error in the OLS model?
+\subquestionwithpoints{2} Assume there was no overfitting. What is the \textit{least likely} source of error in the OLS model?
 
 \iftoggle{solutions}{\inred{
 estimation
@@ -403,7 +404,7 @@ Now assume you use KNN to model the response.
 
 \iftoggle{solutions}{\inred{
 \beqn
-d(\x_*, \x_i) = \sum_{j=1}^{9} \squared{x_{i,j} - x_{*,j}}
+\text{e.g., the Euclidean distance:}~~d(\x_*, \x_i) = \normsq{\x_* - \x_i} := \sum_{j=1}^{9} \squared{x_{i,j} - x_{*,j}}
 \eeqn
 }}{~\spc{1}}
 
