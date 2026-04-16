@@ -242,3 +242,27 @@ Find the oosRMSE of this optimal-node-size model.
 #TO-DO
 ```
 
+# Regression Trees
+
+You can use the `YARF` package if it works, otherwise, use the `randomForest` package (the canonical R package for this algorithm).
+
+Let's take a look at a simulated sine curve. Below is the code for the data generating process:
+
+```{r}
+rm(list = ls())
+n = 500
+sigma = 0.3
+x_min = 0
+x_max = 10
+x = runif(n, x_min, x_max)
+
+f_x = function(x){sin(x)}
+x = runif(n, x_min, x_max)
+y = f_x(x) + rnorm(n, 0, sigma)
+```
+
+Provide the bias-variance decomposition of this DGP fit with the tree model fitted with the optimal N_0 from the previous lab. It is a lot of code, but it is in the practice lectures. If your three numbers don't add up within two significant digits, increase your resolution.
+
+```{r}
+#TO-DO
+```
