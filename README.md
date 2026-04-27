@@ -12,9 +12,9 @@ My theory lectures are following my previous class notes (see [here](https://git
 
 ## Labs
 
-<!-- 
-* [Lab 11, due 5/10](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab11.Rmd) pushed to your github repo 
-* [Lab 10, due 5/3](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab10.Rmd) pushed to your github repo-->
+<!-- -->
+* [Lab 11, due 5/14](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab11.Rmd) pushed to your github repo 
+* [Lab 10, due 5/3](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab10.Rmd) pushed to your github repo
 * [Lab 9, due 4/26](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab09.Rmd) pushed to your github repo
 * [Lab 8, due 4/19](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab08.Rmd) pushed to your github repo
 * [Lab 7, due 4/5](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/labs/lab07.Rmd) pushed to your github repo
@@ -36,6 +36,7 @@ My theory lectures are following my previous class notes (see [here](https://git
 * Homework 1 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/homeworks/hw01/hw01t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/homeworks/hw01/hw01t.pdf) (due 2/7 pushed to your github repo)
 
 ## Writing Assignments
+
 * Modeling Essay Preassignment [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/writing_assignments/modeling_essay_revised.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/writing_assignments/modeling_essay_revised.pdf) due 3/17 11:59PM by email
 * Modeling Essay [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/writing_assignments/modeling_essay_revised.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/writing_assignments/modeling_essay_revised.pdf) due 4/1 11:59PM by email [(example A+ essay 1)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/writing_assignments/modeling_essay_example_1.pdf) [(example A+ essay 2)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/writing_assignments/modeling_essay_example_2.pdf)
 * Final Project [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/writing_assignments/final_project.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2026/blob/master/writing_assignments/final_project.pdf) due 5/26 11:59PM by email
