@@ -8,6 +8,43 @@ output: pdf_document
 
 Source the code from this unit in the previous lab.
 
+Plot an ROC curve in-sample and interpret.
+
+```{r}
+#TO-DO
+```
+
+#TO-DO interpretation
+
+
+Plot an ROC curve oos and interpret.
+
+```{r}
+#TO-DO
+```
+
+#TO-DO interpretation
+
+Calculate AUC oos and interpret.
+
+```{r}
+#TO-DO
+```
+
+Calculate AUC in-sample and interpret.
+
+```{r}
+#TO-DO
+```
+
+#TO-DO interpretation
+
+Plot a DET curve in-sample and interpret.
+
+```{r}
+#TO-DO
+```
+
 Plot a DET curve oos and interpret.
 
 ```{r}

@@ -137,29 +137,8 @@ Plot an ROC curve in-sample and interpret.
 
 #TO-DO interpretation
 
-Calculate AUC in-sample and interpret.
-
-```{r}
-#TO-DO
-```
-
-#TO-DO interpretation
-
-Plot a DET curve in-sample and interpret.
-
-```{r}
-#TO-DO
-```
 
 Plot an ROC curve oos and interpret.
-
-```{r}
-#TO-DO
-```
-
-#TO-DO interpretation
-
-Calculate AUC oos and interpret.
 
 ```{r}
 #TO-DO
