@@ -4,6 +4,18 @@ author: "Your Name Here"
 output: pdf_document
 ---
 
+# Asymmetric Cost Modeling, ROC and DET curves
+
+Source the code from this unit in the previous lab.
+
+Plot a DET curve oos and interpret.
+
+```{r}
+#TO-DO
+```
+
+#TO-DO interpretation
+
 
 # Missing Data
 
@@ -18,7 +30,6 @@ X = as.matrix(boston_shuffled[, 1 : 13])
 y = boston_shuffled$medv
 rm(boston, boston_shuffled)
 ```
-
 
 
 Similar to lab 1, write a function that takes a matrix and punches holes (i.e. sets entries equal to `NA`) randomly with an argument `prob_missing`.

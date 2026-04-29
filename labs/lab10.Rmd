@@ -167,14 +167,6 @@ Calculate AUC oos and interpret.
 
 #TO-DO interpretation
 
-Plot a DET curve oos and interpret.
-
-```{r}
-#TO-DO
-```
-
-#TO-DO interpretation
-
 
 #YARF
 
