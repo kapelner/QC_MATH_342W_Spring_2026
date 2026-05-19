@@ -4,7 +4,7 @@
 
 
 \newtoggle{solutions}
-%\toggletrue{solutions}
+\toggletrue{solutions}
 
 \newcommand{\instr}{\small Your answer will consist of a lowercase string (e.g. \texttt{aebgd}) where the order of the letters does not matter. \normalsize}
 
@@ -83,7 +83,7 @@ Regardless of what you wrote in the previous questions, you employ a probit regr
 \iftoggle{solutions}{\inred{
 \beqn
 \hat{y}_\star &=& \b\x_\star = \b [1~\zerovec_p^\top] = b_0 = -3.994 \\
-\hat{p}_\star &=& \Phi^{-1}(\hat{y}_\star) = \Phi^{-1}(-3.994) \approx 0 \quad \text{where}~\Phi^{-1}~ \text{is the inverse CDF for}~Z\sim \stdnormnot
+\hat{p}_\star &=& \Phi(\hat{y}_\star) = \Phi(-3.994) \approx 0 \quad \text{where}~\Phi ~ \text{is the  CDF for}~Z\sim \stdnormnot
 \eeqn
 }}{~\spc{2}}
 
@@ -143,7 +143,7 @@ marital_statusMarried-spouse-absent          marital_statusNever-married
 
 \subquestionwithpoints{1} Given $\mathbb{D}$ and the output from the probit regression on the previous page but no further information, would you be able to trace out a DET curve? \iftoggle{solutions}{\inred{Yes}}{Yes} / no
 
-\subquestionwithpoints{1} Given $\mathbb{D}$ and the output from the probit regression on the previous page but no further information, would you be able to construct the confusion matrix of interest? Yes / \iftoggle{solutions}{\inred{no}}{no}
+\subquestionwithpoints{1} Given $\mathbb{D}$ and the output from the probit regression on the previous page but no further information, would you be able to construct the confusion matrix of interest?  \iftoggle{solutions}{\inred{Yes}}{Yes} / \iftoggle{solutions}{\inred{no}}{no} ~~ \iftoggle{solutions}{\inred{(This question was ambiguous)}}{}
 
 
 \subquestionwithpoints{1} Given $\mathbb{D}$ and the output from the probit regression on the previous page but no further information, would you be able to trace out an ROC curve for the same model but now fit with a logistic link instead of a probit link? Yes / \iftoggle{solutions}{\inred{no}}{no}
@@ -343,29 +343,12 @@ A & B & C \\
 77516 &  13 & 2174 \\ 
   83311 &  13 &   0 \\ 
   215646 &   9 &   0 \\ 
-  125491 &   7 &   543.5 \\ 
-  125491 & 10.5  & 0 \\ 
+ \fbox{125491} &   7 &   \fbox{543.5} \\ 
+ \fbox{125491} & \fbox{10.5}  & 0 \\ 
 \end{tabular}
 \end{table}
 }{~\spc{3.5}}
 
-
-
-% Regardless of your answers in the previous questions, here is the dataset fully imputed:
-
-% \begin{table}[ht]
-% \centering
-% \begin{tabular}{rrr}
-% A & B & C \\ 
-%   \hline
-% 77516 &  13 & 2174 \\ 
-%   83311 &  13 &   0 \\ 
-%   215646 &   9 &   0 \\ 
-%   234721 &   7 &   0 \\ 
-%   338409 &  13 &   0 \\ 
-% \end{tabular}
-% \end{table}
-% \vspace{-0.3cm}
 \subquestionwithpoints{1} Your imputed data set is in which format? Circle one: \iftoggle{solutions}{\inred{wide}}{wide} or long
 
 \subquestionwithpoints{5} If you circled \qu{wide} in the previous question, then convert the table to long below. If you circled \qu{long} in the previous question, then convert the table to wide below. Label the columns in your converted table appropriately.
@@ -379,20 +362,21 @@ metric & val \\
 A & 77516 \\ 
   A & 83311 \\ 
   A & 215646 \\ 
-  A & 234721 \\ 
-  A & 338409 \\ 
+  A & 125491 \\ 
+  A & 125491 \\ 
   B &  13 \\ 
   B &  13 \\ 
   B &   9 \\ 
   B &   7 \\ 
-  B &  13 \\ 
+  B &  10.5 \\ 
   C & 2174 \\ 
   C &   0 \\ 
   C &   0 \\ 
-  C &   0 \\ 
+  C &   543.5 \\ 
   C &   0 \\ 
 \end{tabular}
 \end{table}
+Note: the order of the rows does not matter.
 }}{~\spc{10}}
 
 
